@@ -1,15 +1,11 @@
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
-
 from models.item import Item
+from sqlmodel import Session, select
+from utils.auth import get_auth
 from utils.db import get_session
 
+router = APIRouter(prefix="/item", tags=["Item"])
 
-router = APIRouter(
-    prefix='/item',
-    tags=['Item']
-)
 
 @router.post("/")
 def create_item(item: Item, session: Session = Depends(get_session)) -> Item:
@@ -18,12 +14,17 @@ def create_item(item: Item, session: Session = Depends(get_session)) -> Item:
     session.refresh(item)
     return item
 
+
 @router.patch("/{item_id}")
-def partial_update_item(item_id: int, item_update: Item, session: Session = Depends(get_session)) -> Item:
+def partial_update_item(
+    item_id: int, item_update: Item, session: Session = Depends(get_session)
+) -> Item:
     item = session.get(Item, item_id)
 
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
 
     if item_update.name is not None:
         item.name = item_update.name
@@ -35,12 +36,17 @@ def partial_update_item(item_id: int, item_update: Item, session: Session = Depe
 
     return item
 
+
 @router.put("/{item_id}")
-def update_item(item_id: int, item_update: Item, session: Session = Depends(get_session)) -> Item:
+def update_item(
+    item_id: int, item_update: Item, session: Session = Depends(get_session)
+) -> Item:
     item = session.get(Item, item_id)
 
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
 
     item.name = item_update.name
     item.description = item_update.description
@@ -50,14 +56,18 @@ def update_item(item_id: int, item_update: Item, session: Session = Depends(get_
 
     return item
 
-@router.get("/")
+
+@router.get("/", dependencies=[Depends(get_auth)])
 def get_items(session: Session = Depends(get_session)) -> list[Item]:
-    items =session.exec(select(Item)).all()
+    items = session.exec(select(Item)).all()
     return items
+
 
 @router.get("/{item_id}")
 def get_item(item_id: int, session: Session = Depends(get_session)) -> Item:
     item = session.get(Item, item_id)
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
     return item
