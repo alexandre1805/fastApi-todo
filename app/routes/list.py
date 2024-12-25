@@ -9,7 +9,11 @@ router = APIRouter(prefix="/list", tags=["List"])
 
 
 @router.post("/")
-def create_list(list_create: ListCreateUpdate, session: Session = Depends(get_session), user : User = Depends(get_user)) -> List:
+def create_list(
+    list_create: ListCreateUpdate,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_user),
+) -> List:
     list = List(name=list_create.name, owner=user.username)
     session.add(list)
     session.commit()
@@ -19,7 +23,10 @@ def create_list(list_create: ListCreateUpdate, session: Session = Depends(get_se
 
 @router.patch("/{list_id}")
 def partial_update_list(
-    list_id: int, list_update: ListCreateUpdate, session: Session = Depends(get_session), user : User = Depends(get_user)
+    list_id: int,
+    list_update: ListCreateUpdate,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_user),
 ) -> List:
     list = session.get(List, list_id)
 
@@ -30,7 +37,8 @@ def partial_update_list(
 
     if list.owner != user.username:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"{user.username} is not the owner of list {list_id}"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{user.username} is not the owner of list {list_id}",
         )
 
     if list_update.name is not None:
@@ -44,7 +52,10 @@ def partial_update_list(
 
 @router.put("/{list_id}")
 def update_list(
-    list_id: int, list_update: ListCreateUpdate, session: Session = Depends(get_session), user : User = Depends(get_user)
+    list_id: int,
+    list_update: ListCreateUpdate,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_user),
 ) -> List:
     list = session.get(List, list_id)
 
@@ -55,7 +66,8 @@ def update_list(
 
     if list.owner != user.username:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"{user.username} is not the owner of list {list_id}"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{user.username} is not the owner of list {list_id}",
         )
 
     list.name = list_update.name
@@ -68,13 +80,19 @@ def update_list(
 
 
 @router.get("/")
-def get_lists(session: Session = Depends(get_session), user : User = Depends(get_user)) -> list[List]:
+def get_lists(
+    session: Session = Depends(get_session), user: User = Depends(get_user)
+) -> list[List]:
     lists = session.exec(select(List).where(List.owner == user.username)).all()
     return lists
 
 
 @router.get("/{list_id}/items")
-def get_list_items(list_id: int, session: Session = Depends(get_session), user : User = Depends(get_user)) -> list[Item]:
+def get_list_items(
+    list_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_user),
+) -> list[Item]:
     list = session.get(List, list_id)
     if not list:
         raise HTTPException(
@@ -83,16 +101,20 @@ def get_list_items(list_id: int, session: Session = Depends(get_session), user :
 
     if list.owner != user.username:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"{user.username} is not the owner of list {list_id}"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{user.username} is not the owner of list {list_id}",
         )
 
-    items = session.exec(
-            select(Item).where(Item.list_id == list_id)
-        ).all()
+    items = session.exec(select(Item).where(Item.list_id == list_id)).all()
     return items
 
+
 @router.get("/{list_id}")
-def get_list(list_id: int, session: Session = Depends(get_session), user : User = Depends(get_user)) -> List:
+def get_list(
+    list_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_user),
+) -> List:
     list = session.get(List, list_id)
     if not list:
         raise HTTPException(
@@ -101,7 +123,8 @@ def get_list(list_id: int, session: Session = Depends(get_session), user : User 
 
     if list.owner != user.username:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"{user.username} is not the owner of list {list_id}"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{user.username} is not the owner of list {list_id}",
         )
 
     return list

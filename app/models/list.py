@@ -7,5 +7,6 @@ class List(SQLModel, table=True):
     name: str = Field()
     owner: str = Field()
 
+
 class ListCreateUpdate(BaseModel):
-    name : str
+    name: str
